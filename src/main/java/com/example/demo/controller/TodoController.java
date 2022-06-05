@@ -44,26 +44,15 @@ public class TodoController {
             entity.setID(null);
             entity.setUSERID(userId);
 
-            List<TodoEntity> entities = service.create(entity);
-            List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-
-            return ResponseEntity.ok().body(response);
+            return create_OKresponse(service.create(entity));
         } catch(Exception e) {
-            String error = e.getMessage();
-            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
-            return ResponseEntity.badRequest().body(response);
+            return create_BADresponse(e);
         }
     }
 
     @GetMapping("/get")
     public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal String userId) {
-
-        List<TodoEntity> entities = service.retrieve(userId);
-        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-
-        return ResponseEntity.ok().body(response);
+        return create_OKresponse(service.retrieve(userId));
     }
 
     @PutMapping("/put")
@@ -72,11 +61,7 @@ public class TodoController {
         TodoEntity entity = TodoDTO.toEntity(dto);
         entity.setUSERID(userId);
 
-        List<TodoEntity> entities = service.update(entity);
-        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-
-        return ResponseEntity.ok().body(response);
+        return create_OKresponse(service.update(entity));
     }
 
     @DeleteMapping("/delete")
@@ -85,15 +70,23 @@ public class TodoController {
         try {
             TodoEntity entity = TodoDTO.toEntity(dto);
             entity.setUSERID(userId);
-            List<TodoEntity> entities = service.delete(entity);
-            List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
-            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-            return ResponseEntity.ok().body(response);
+            return create_OKresponse(service.delete(entity));
         } catch(Exception e) {
-            String error = e.getMessage();
-            ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
-            return ResponseEntity.badRequest().body(response);
+            return create_BADresponse(e);
         }
+    }
+
+    private ResponseEntity<?> create_OKresponse(List<TodoEntity> entity) {
+        List<TodoDTO> dtos = entity.stream().map(TodoDTO::new).collect(Collectors.toList());
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+        response.setLength(dtos.size());
+        return ResponseEntity.ok().body(response);
+    }
+
+    private ResponseEntity<?> create_BADresponse(Exception e) {
+        String error = e.getMessage();
+        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
+        return ResponseEntity.badRequest().body(response);
     }
 }

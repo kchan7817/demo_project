@@ -13,5 +13,6 @@ import java.util.List;
 @Data
 public class ResponseDTO<T> {
     private String error;
+    private int length;
     private List<T> data;
 }

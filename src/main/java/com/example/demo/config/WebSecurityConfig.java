@@ -30,6 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()    .antMatchers("/", "/auth/**").permitAll()
                 .anyRequest()           .authenticated();
 
+
         http.addFilterAfter(
                 jwtAuthenticationFilter,
                 CorsFilter.class

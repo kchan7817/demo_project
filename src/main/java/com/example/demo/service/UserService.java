@@ -2,7 +2,6 @@ package com.example.demo.service;
 
 import com.example.demo.medel.UserEntity;
 import com.example.demo.persistence.UserRepository;
-import com.example.demo.security.TokenProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
