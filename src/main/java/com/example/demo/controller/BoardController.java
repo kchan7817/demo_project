@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ResponseDTO;
-import com.example.demo.dto.TodoDTO;
-import com.example.demo.medel.TodoEntity;
+import com.example.demo.dto.BoardDTO;
+import com.example.demo.medel.BoardEntity;
 import com.example.demo.service.TodoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
                 RequestMethod.POST,
                 RequestMethod.DELETE
         })
-public class TodoController {
+public class BoardController {
 
     @Autowired
     private TodoService service;
@@ -37,10 +37,10 @@ public class TodoController {
     }
 
     @PostMapping("/post")
-    public ResponseEntity<?> createTodo(@RequestBody TodoDTO dto, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<?> createTodo(@RequestBody BoardDTO dto, @AuthenticationPrincipal String userId) {
 
         try {
-            TodoEntity entity = TodoDTO.toEntity(dto);
+            BoardEntity entity = BoardDTO.toEntity(dto);
             entity.setID(null);
             entity.setUSERID(userId);
 
@@ -56,19 +56,19 @@ public class TodoController {
     }
 
     @PutMapping("/put")
-    public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<?> updateTodo(@RequestBody BoardDTO dto, @AuthenticationPrincipal String userId) {
 
-        TodoEntity entity = TodoDTO.toEntity(dto);
+        BoardEntity entity = BoardDTO.toEntity(dto);
         entity.setUSERID(userId);
 
         return create_OKresponse(service.update(entity));
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto, @AuthenticationPrincipal String userId) {
+    public ResponseEntity<?> deleteTodo(@RequestBody BoardDTO dto, @AuthenticationPrincipal String userId) {
 
         try {
-            TodoEntity entity = TodoDTO.toEntity(dto);
+            BoardEntity entity = BoardDTO.toEntity(dto);
             entity.setUSERID(userId);
 
             return create_OKresponse(service.delete(entity));
@@ -77,16 +77,16 @@ public class TodoController {
         }
     }
 
-    private ResponseEntity<?> create_OKresponse(List<TodoEntity> entity) {
-        List<TodoDTO> dtos = entity.stream().map(TodoDTO::new).collect(Collectors.toList());
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
+    private ResponseEntity<?> create_OKresponse(List<BoardEntity> entity) {
+        List<BoardDTO> dtos = entity.stream().map(BoardDTO::new).collect(Collectors.toList());
+        ResponseDTO<BoardDTO> response = ResponseDTO.<BoardDTO>builder().data(dtos).build();
         response.setLength(dtos.size());
         return ResponseEntity.ok().body(response);
     }
 
     private ResponseEntity<?> create_BADresponse(Exception e) {
         String error = e.getMessage();
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
+        ResponseDTO<BoardDTO> response = ResponseDTO.<BoardDTO>builder().error(error).build();
         return ResponseEntity.badRequest().body(response);
     }
 }

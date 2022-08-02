@@ -1,75 +1,80 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.FileDTO;
-import com.example.demo.dto.ResponseDTO;
-import com.example.demo.medel.FileEntity;
-import com.example.demo.service.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.example.demo.dto.FileDTO;
+import com.example.demo.dto.ResponseDTO;
+import com.example.demo.medel.FileEntity;
+import com.example.demo.service.FileStorageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 @RestController
-@RequestMapping(
-        value = "/file",
-        method = {
-                RequestMethod.GET,
-                RequestMethod.POST,
-                RequestMethod.DELETE
-        })
+@RequestMapping("/files")
 public class FileController {
 
     @Autowired
-    private FileService service;
+    private FileStorageService storageService;
 
-    @PostMapping("/post")
-    public ResponseEntity<?> createTodo(@RequestBody FileDTO dto, @AuthenticationPrincipal String userId) {
-
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadFile(@ModelAttribute MultipartFile file, @AuthenticationPrincipal String userId) {
+        String message = "";
         try {
-            FileEntity entity = FileDTO.toEntity(dto);
-            entity.setId(null);
-            entity.setOwner(userId);
+            storageService.store(file, userId);
+            message = "Uploaded the file successfully: " + file.getOriginalFilename();
 
-            service.store(entity);
-
-            return create_OKresponse();
-        } catch(Exception e) {
-            return create_BADresponse(e);
+            List<String> list = new ArrayList<>();
+            list.add(message);
+            return create_OKresponse(list);
+        } catch (Exception e) {
+            List<String> list = new ArrayList<>();
+            list.add("failed to upload file");
+            return create_BADresponse(list);
         }
     }
 
-    @GetMapping("/get")
-    public ResponseEntity<?> retrieveTodoList(@AuthenticationPrincipal String userId) {
-        return create_OKresponse(service.retrieve(userId));
-    }
+    @GetMapping("/list")
+    public ResponseEntity<?> getListFiles(@AuthenticationPrincipal String userId) {
+        List<FileDTO> files = storageService.getAllFiles(userId).map(dbFile -> {
+            String fileDownloadUri = ServletUriComponentsBuilder
+                    .fromCurrentContextPath()
+                    .path("/files/")
+                    .path(dbFile.getId())
+                    .toUriString();
+            return new FileDTO(
+                    dbFile.getName(),
+                    fileDownloadUri,
+                    dbFile.getType(),
+                    dbFile.getData().length);
+        }).collect(Collectors.toList());
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto, @AuthenticationPrincipal String userId) {
-
-        try {
-            TodoEntity entity = TodoDTO.toEntity(dto);
-            entity.setUSERID(userId);
-
-            return create_OKresponse(service.delete(entity));
-        } catch(Exception e) {
-            return create_BADresponse(e);
-        }
-    }
-
-    private ResponseEntity<?> create_OKresponse(List<TodoEntity> entity) {
-        List<TodoDTO> dtos = entity.stream().map(TodoDTO::new).collect(Collectors.toList());
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().data(dtos).build();
-        response.setLength(dtos.size());
+        ResponseDTO<FileDTO> response = ResponseDTO.<FileDTO>builder().data(files).build();
         return ResponseEntity.ok().body(response);
     }
 
-    private ResponseEntity<?> create_BADresponse(Exception e) {
-        String error = e.getMessage();
-        ResponseDTO<TodoDTO> response = ResponseDTO.<TodoDTO>builder().error(error).build();
+    @GetMapping("/download/{id}")
+    public ResponseEntity<byte[]> getFile(@PathVariable String id, @AuthenticationPrincipal String userId) {
+        FileEntity fileDB = storageService.getFile(id, userId);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.getName() + "\"")
+                .body(fileDB.getData());
+    }
+
+    private ResponseEntity<?> create_OKresponse(List<String> entity) {
+        ResponseDTO<String> response = ResponseDTO.<String>builder().data(entity).build();
+        return ResponseEntity.ok().body(response);
+    }
+
+    private ResponseEntity<?> create_BADresponse(List<String> entity) {
+        List<String> dtos = entity.stream().map(String::new).collect(Collectors.toList());
+        ResponseDTO<String> response = ResponseDTO.<String>builder().data(dtos).build();
         return ResponseEntity.badRequest().body(response);
     }
 }

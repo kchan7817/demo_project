@@ -1,6 +1,6 @@
 package com.example.demo.dto;
 
-import com.example.demo.medel.TodoEntity;
+import com.example.demo.medel.BoardEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,19 +8,19 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class TodoDTO {
+public class BoardDTO {
     private String id;
     private String title;
     private boolean done;
 
-    public TodoDTO(final TodoEntity entity) {
+    public BoardDTO(final BoardEntity entity) {
         this.id = entity.getID();
         this.title = entity.getTITLE();
         this.done = entity.isDONE();
     }
 
-    public static TodoEntity toEntity(final TodoDTO dto) {
-        return TodoEntity.builder()
+    public static BoardEntity toEntity(final BoardDTO dto) {
+        return BoardEntity.builder()
                 .ID(dto.getId())
                 .TITLE(dto.getTitle())
                 .DONE(dto.isDone())

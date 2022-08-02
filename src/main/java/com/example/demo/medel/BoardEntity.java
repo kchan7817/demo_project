@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @Data
 @Entity
 @Table(name = "Todo")
-public class TodoEntity {
+public class BoardEntity {
 
     @Id
     @GeneratedValue(generator = "system-uuid")

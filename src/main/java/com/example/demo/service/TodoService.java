@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.medel.TodoEntity;
+import com.example.demo.medel.BoardEntity;
 import com.example.demo.persistence.TodoRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,18 +18,18 @@ public class TodoService {
 
     public String testService() {
 
-        TodoEntity entity = TodoEntity.builder()
+        BoardEntity entity = BoardEntity.builder()
                         .TITLE("My first todo item")
                         .build();
 
         repository.save(entity);
 
-        TodoEntity savedEntity = repository.findById(entity.getID()).get();
+        BoardEntity savedEntity = repository.findById(entity.getID()).get();
 
         return savedEntity.getTITLE();
     }
 
-    public List<TodoEntity> create(final TodoEntity entity) {
+    public List<BoardEntity> create(final BoardEntity entity) {
         // Valdiations
         validate(entity);
 
@@ -40,7 +40,7 @@ public class TodoService {
         return repository.findByUserId(entity.getUSERID());
     }
 
-    private void validate(final TodoEntity entity) {
+    private void validate(final BoardEntity entity) {
         if(entity == null) {
             log.warn("Entity cannot be null.");
             throw new RuntimeException("Entity cannot be null.");
@@ -52,14 +52,14 @@ public class TodoService {
         }
     }
 
-    public List<TodoEntity> retrieve(final String userId) {
+    public List<BoardEntity> retrieve(final String userId) {
         return repository.findByUserId(userId);
     }
 
-    public List<TodoEntity> update(final TodoEntity entity) {
+    public List<BoardEntity> update(final BoardEntity entity) {
         validate(entity);
 
-        final Optional<TodoEntity> original = repository.findById(entity.getID());
+        final Optional<BoardEntity> original = repository.findById(entity.getID());
 
         original.ifPresent(todo -> {
            todo.setTITLE(entity.getTITLE());
@@ -70,7 +70,7 @@ public class TodoService {
         return retrieve(entity.getUSERID());
     }
 
-    public List<TodoEntity> delete(final TodoEntity entity) {
+    public List<BoardEntity> delete(final BoardEntity entity) {
         validate(entity);
 
         try {
