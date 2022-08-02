@@ -3,7 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.ResponseDTO;
 import com.example.demo.dto.BoardDTO;
 import com.example.demo.medel.BoardEntity;
-import com.example.demo.service.TodoService;
+import com.example.demo.service.BoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class BoardController {
 
     @Autowired
-    private TodoService service;
+    private BoardService service;
 
     @GetMapping("/test")
     public ResponseEntity<?> testTodo() {

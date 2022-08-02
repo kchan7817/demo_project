@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Repository
-public interface TodoRepository extends JpaRepository<BoardEntity, String> {
+public interface BoardRepository extends JpaRepository<BoardEntity, String> {
 
     @Query(value = "select * from Todo t where t.USERID = ?1", nativeQuery = true)
     List<BoardEntity> findByUserId(String userId);
